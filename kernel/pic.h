@@ -14,7 +14,7 @@ static void initialize_pic()
 	/* ICW2 - remap offset address of idt_table */
 	/*
 	* In x86 protected mode, we have to remap the PICs beyond 0x20 because
-	* Intel have designated the first 32 interrupts as "reserved" for cpu exceptions
+	* Intel have designated the first 32 interseerupts as "reserved" for cpu exceptions
 	*/
 	write_port(PIC_1_DATA, 0x20);
 	write_port(PIC_2_DATA, 0x28);

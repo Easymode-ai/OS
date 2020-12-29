@@ -36,19 +36,11 @@ _start:
 # assign current stack pointer location to stackTop
 mov $stackTop, %esp
 
-#call load_idt
-# call the kernel main source
 hltLoop:
-call kernel_entry
-
+call kernel_entry				# call the kernel main source
 cli
-
-
-# put system in infinite loop
-
-
 hlt
-jmp hltLoop
+jmp hltLoop						# put system in infinite loop
 
 .size _start, . - _start
 
@@ -75,16 +67,16 @@ mov %ebp, %esp
 leave
 ret
 
-.text
-.global _free
-_free:
-push %ebp
-mov %esp, %ebp
-sub $0x10, %esp
-movb $0x8, -0x1(%ebp)
-mov $0x0, %eax  
-leave
-ret
+#.text
+#.global _free
+#_free:
+#push %ebp
+#mov %esp, %ebp
+#sub $0x10, %esp
+#movb $0x8, -0x1(%ebp)
+#mov $0x0, %eax  
+#leave
+#ret
 
 #.text
 #.global malloc
@@ -118,19 +110,19 @@ lidt (%eax)
 sti
 ret
 
-.text
-.global _key
-_key:
-xor %ah, %ah
-int $0x16 #BIOS Keyboard Service 
-ret
+#.text
+#.global _key
+#_key:
+#xor %ah, %ah
+#int $0x16 #BIOS Keyboard Service 
+#ret*/
 
-.text
-.global idt_flush
-idt_flush:
-mov 4(%esp), %eax  	# Get the pointer to the IDT, passed as a parameter.
-lidt (%eax)        		# Load the IDT pointer.
-ret
+#.text
+#.global idt_flush
+#idt_flush:
+#mov 4(%esp), %eax  	# Get the pointer to the IDT, passed as a parameter.
+#lidt (%eax)        		# Load the IDT pointer.
+#ret
 
 #arg: int, port number.
 .global read_port
@@ -147,6 +139,7 @@ mov   4(%esp), %edx #edx, [esp + 4]
 mov   8(%esp), %al #al, [esp + 4 + 4]  
 out   %al, %dx #dx, al  
 ret
+
 .global keyboard_handler_int
 keyboard_handler_int:
 call keyboard_handler
