@@ -6,4 +6,5 @@ Linux OR compatible, binutils, gcc i386, g++-multilib
 
 # Getting Started
 Run make
-Run qemu: qemu-system-x86_64 -kernel MyOS.bin
+
+Run qemu qemu-system-x86_64 -kernel MyOS.bin
