@@ -1,0 +1,1 @@
+"c:\Program Files\qemu\qemu-system-x86_64.exe" -kernel c:\os\os\MyOS.bin
