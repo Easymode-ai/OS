@@ -1,5 +1,10 @@
 #pragma once
 
+void e9_putchar(char * arg)
+{
+	write_port(0xE9 , arg);
+}
+
 static const char lut[17] = { '0', '1', '2','3','4','5','6','7','8','9','0','A','B','C','D','E','F'};
 
 static char* hexlookup(char buffer[11], int value){
@@ -40,10 +45,11 @@ static int printf( char * arg, int x,  int y, char color)
 {
 	int len =0;
 	for(int i=0; arg[i]!='\0';++i){
-		putchar((char)arg[i], x, y +i ,  color);
+		vga_putchar((char)arg[i], x, y +i ,  color);
+		e9_putchar(arg[i]);
 		len++;
 	}
-	
+	e9_putchar('\n');
 	return len;
 }
 
@@ -61,7 +67,7 @@ static int printint( int integer, int x,  int y, char color)
 	}
 	
 	for(int i =1; i < measure+1; i++)
-	putchar((char)buffer[i]+'0', x, y +i-1 ,  color);
+	vga_putchar((char)buffer[i]+'0', x, y +i-1 ,  color);
 	
 	return measure-1;
 }
@@ -98,6 +104,6 @@ static void printhex( char * arg, int x,  int y, char color)
 	hexlookup(buffer, arg);
 	
 	for(int i=9; i > -1;i--)
-	putchar((char)buffer[i], x, y +i ,  color);
+	vga_putchar((char)buffer[i], x, y +i ,  color);
 }
 

@@ -1,28 +1,39 @@
 # set magic number to 0x1BADB002 to identified by bootloader 
 .set MAGIC,    0x1BADB002
 
+# bits
+.set ALIGN,    1<<0             
+.set MEMINFO,  1<<1
+.set VIDINFO,  1<<2
+
 # set flags to 0
-.set FLAGS,    0
+.set FLAGS,    ALIGN | MEMINFO | VIDINFO
 
 # set the checksum
 .set CHECKSUM, -(MAGIC + FLAGS)
 
 # set multiboot enabled
 .section .multiboot
-
+.align 4
 # define type to long for each data defined as above
 .long MAGIC
 .long FLAGS
 .long CHECKSUM
-
+.long 0 	#12	u32	header_addr	if flags[16] is set
+.long 0 	#16	u32	load_addr	if flags[16] is set
+.long 0 	#20	u32	load_end_addr	if flags[16] is set
+.long 0 	#24	u32	bss_end_addr	if flags[16] is set
+.long 0 	#28	u32	entry_addr	if flags[16] is set
+.long 0 	#32	u32	mode_type	if flags[2] is set
+.long 1280 	#36	u32	width	if flags[2] is set
+.long 720 	#40	u32	height	if flags[2] is set
+.long 32 	#44	u32	depth	if flags[2] is set
 
 # set the stack bottom 
+.section .bss
 stackBottom:
-
 # define the maximum size of stack to 512 bytes
-.skip 525024
-
-
+.skip 524288
 # set the stack top which grows from higher to lower
 stackTop:
 

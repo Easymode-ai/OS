@@ -16,10 +16,12 @@ void keyboard_handler(void)
 		if (keyboard_map[keycode] == '\b') 
 		{ 
 			charoffset--;
-			putchar((char)0, 10,charoffset,BLACK);
+			vga_putchar((char)0, 10,charoffset,BLACK);
+			e9_putchar((char)keyboard_map[keycode]);
 
 		}else{
-			putchar((char)keyboard_map[keycode], 10,charoffset,BLACK);
+			vga_putchar((char)keyboard_map[keycode], 10,charoffset,BLACK);
+			e9_putchar((char)keyboard_map[keycode]);
 			charoffset++;
 		}
 		/* Attribute 0x07 is white on black characters */

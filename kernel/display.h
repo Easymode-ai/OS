@@ -45,7 +45,8 @@ void initVga(uint8 fore_color, uint8 back_color)
 	clear_vga_buffer(&vga_buffer, fore_color, back_color);  //clear buffer
 }
 
-void putchar( char * arg, int x,  int y, char color)
+void vga_putchar( char * arg, int x,  int y, char color)
 {
 	vga_buffer[x*SCREENWIDTH+y]= vga_entry((char)arg, WHITE,  color);	
+
 }

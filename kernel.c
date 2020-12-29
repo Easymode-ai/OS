@@ -53,9 +53,9 @@ void kernel_entry()
 	printhex(&first_page_table[MAXMEMORY],0,offset+12, RED);
 
 	printsize(differenceInBytes* sizeof(int),0,50,DARK_GREY, BYTE);
-	putchar('(',0,offset,RED); 
-	putchar('-',0,offset+11,RED); 
-	putchar(')',0,offset+22,RED); 
+	vga_putchar('(',0,offset,RED); 
+	vga_putchar('-',0,offset+11,RED); 
+	vga_putchar(')',0,offset+22,RED); 
 
 	printhex(blaha,2,2, BLUE);
 	printhex(blahb,3,2, BLUE);
@@ -63,10 +63,10 @@ void kernel_entry()
 	printint(((blahd - blahc)),4,20,DARK_GREY);
 	printhex(blahd,5,2, BLUE);
 
-	putchar((char)blaha[0], 2,0,DARK_GREY);	
-	putchar((char)blahb[0], 3,0,DARK_GREY);
-	putchar((char)blahc[0], 4,0,DARK_GREY);
-	putchar((char)blahd[0], 5,0,DARK_GREY);
+	vga_putchar((char)blaha[0], 2,0,DARK_GREY);	
+	vga_putchar((char)blahb[0], 3,0,DARK_GREY);
+	vga_putchar((char)blahc[0], 4,0,DARK_GREY);
+	vga_putchar((char)blahd[0], 5,0,DARK_GREY);
 
 	
 	while(1)
