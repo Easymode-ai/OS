@@ -4,7 +4,16 @@ ENTRY(_start)
 SECTIONS
 {
 	/* we need 1MB of space atleast */
-	. = 1M;
+	. = 2M;
+	//. = 0xffffffff80100000;
+
+	
+    .stivalehdr ALIGN(4K) :
+    {
+        KEEP(*(.stivalehdr))
+    }
+
+
 
   	/* text section */
 	.text BLOCK(4K) : ALIGN(4K)

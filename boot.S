@@ -25,15 +25,25 @@
 .long 0 	#24	u32	bss_end_addr	if flags[16] is set
 .long 0 	#28	u32	entry_addr	if flags[16] is set
 .long 0 	#32	u32	mode_type	if flags[2] is set
-.long 1280 	#36	u32	width	if flags[2] is set
-.long 720 	#40	u32	height	if flags[2] is set
+.long 800 	#36	u32	width	if flags[2] is set
+.long 600 	#40	u32	height	if flags[2] is set
 .long 32 	#44	u32	depth	if flags[2] is set
+
+#.section .stivalehdr
+#.long 0
+#.long 0
+#.long 0
+#.long 0
+#.long 0
+#.long 0
 
 # set the stack bottom 
 .section .bss
 stackBottom:
+
 # define the maximum size of stack to 512 bytes
 .skip 524288
+
 # set the stack top which grows from higher to lower
 stackTop:
 

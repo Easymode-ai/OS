@@ -9,9 +9,17 @@
 
 #include "drivers/keyboard.h"
 
-#include "libc/include/string.h"
+//#include "libc/include/string.h"
 
-void kernel_entry()
+static void putpixel(unsigned char* screen, int x,int y, int color) {
+	
+	unsigned where = x*4 + y*3200;
+    screen[where] = color & 255;              // BLUE
+    screen[where + 1] = (color >> 8) & 255;   // GREEN
+    screen[where + 2] = (color >> 16) & 255;  // RED
+}
+
+void kernel_entry(struct stivale_struct *info) 
 {
 	/* init pic/idt */
 	initialize_pic();
@@ -24,8 +32,27 @@ void kernel_entry()
 	/* init memory */
 	initMemory();
 
+ //char* video  = (char*)0xb8000;
+ 
+int reswidth =1024;
+int resheight = 768;
+
+ for (int z =0; z < 222; z++)
+ {
+	for (int h =0; h < 55; h++)
+	{
+		   
+	putpixel(0xA0000, z, h, 0x7800);
+	}
+ }
+
 	/* init display */
-	initVga(WHITE, BLACK);
+	//initVga(WHITE, BLACK);
+		
+   // printf("Stivale information passed to the kernel:", 0,0,RED);	
+    //printf("Cmdline: %s", (char*)info->cmdline);
+   // printf(info->memory_map_addr);
+
 	
 	/* malloc test */
 	char* blaha = malloc(1);
@@ -74,3 +101,15 @@ void kernel_entry()
 	asm volatile("hlt");
 	}
 }
+
+/*
+__attribute__((section(".stivalehdr"), used))
+struct stivale_header header = {
+    .stack              = 0,
+    .framebuffer_bpp    = 0,
+    .framebuffer_width  = 0,
+    .framebuffer_height = 0,
+    .flags              = 1,
+    .entry_point        = 0
+};
+*/
