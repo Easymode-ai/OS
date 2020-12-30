@@ -1,1 +1,0 @@
-"c:\Program Files\qemu\qemu-system-x86_64.exe" -drive format=raw,file=test.img -debugcon stdio -m 1G
