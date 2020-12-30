@@ -1,4 +1,4 @@
-LIMINE=/home/scx/limine/limine-barebones-master/
+LIMINE=limine/
 BIN = MyOS.bin
 LIB_SOURCES = $(wildcard libc/include/*.c libc/string/*.c libc/stdlib/*.c)
 HEADERS = $(wildcard *.h kernel/*.h drivers/*.h libc/include/*.h)
