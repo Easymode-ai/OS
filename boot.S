@@ -7,7 +7,7 @@
 .set VIDINFO,  1<<2
 
 # set flags to 0
-.set FLAGS,    ALIGN | MEMINFO | VIDINFO
+.set FLAGS,    0#ALIGN | MEMINFO | VIDINFO
 
 # set the checksum
 .set CHECKSUM, -(MAGIC + FLAGS)
@@ -19,15 +19,18 @@
 .long MAGIC
 .long FLAGS
 .long CHECKSUM
-.long 0 	#12	u32	header_addr	if flags[16] is set
-.long 0 	#16	u32	load_addr	if flags[16] is set
-.long 0 	#20	u32	load_end_addr	if flags[16] is set
-.long 0 	#24	u32	bss_end_addr	if flags[16] is set
-.long 0 	#28	u32	entry_addr	if flags[16] is set
-.long 0 	#32	u32	mode_type	if flags[2] is set
-.long 800 	#36	u32	width	if flags[2] is set
-.long 600 	#40	u32	height	if flags[2] is set
-.long 32 	#44	u32	depth	if flags[2] is set
+.set WIDTH, 800  /* requested width */
+.set HEIGHT, 600  /* requested height */
+.set DEPTH, 32    /* requested bits per pixel BPP */
+#.long 0 	#12	u32	header_addr	if flags[16] is set
+#.long 0 	#16	u32	load_addr	if flags[16] is set
+#.long 0 	#20	u32	load_end_addr	if flags[16] is set
+#.long 0 	#24	u32	bss_end_addr	if flags[16] is set
+#.long 0 	#28	u32	entry_addr	if flags[16] is set
+#.long 0 	#32	u32	mode_type	if flags[2] is set
+#.long 800 	#36	u32	width	if flags[2] is set
+#.long 600 	#40	u32	height	if flags[2] is set
+#.long 32 	#44	u32	depth	if flags[2] is set
 
 #.section .stivalehdr
 #.long 0
@@ -56,7 +59,6 @@ _start:
 
 # assign current stack pointer location to stackTop
 mov $stackTop, %esp
-
 hltLoop:
 call kernel_entry				# call the kernel main source
 cli

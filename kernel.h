@@ -12,6 +12,7 @@ typedef unsigned long long uint64_t;
 typedef unsigned long uintptr_t;
 
 
+
 	
 extern void loadpage(unsigned int*);
 extern void enablePaging();
@@ -55,7 +56,7 @@ enum vga_color {
 };
 
 
-static uint8_t stack[2097152] = {0};
+static uint8_t stack[22097152] = {0};
 
 struct stivale_struct {
     uint64_t cmdline;

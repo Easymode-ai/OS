@@ -2,7 +2,7 @@
 
 #define SCREENWIDTH 80
 #define VGA_ADDRESS 0xB8000
-
+#include "../kernel/font.h"
 /*
 16 bit video buffer elements(register ax)
 8 bits(ah) higher : 
@@ -12,6 +12,18 @@ higher 4 bits - back color
 8 bits(al) lower :
 8 bits : ASCII character to print
 */
+
+ uint64_t videoptr = NULL;
+ uint64_t videopitch = 0;
+ uint64_t videobpp =0;
+ 
+static void putpixel(uint32_t* screen, int x,int y, int r, int g, int b) {
+	
+	size_t index = x + ((int)videopitch*(int)videobpp ) * y ;// x+ ((uint32_t)videopitch  / ((uint32_t)videobpp/8)) * y;
+
+    screen[index] = 0xffffff;
+ 
+}
 
 static uint16 vga_entry(unsigned char ch, uint8 fore_color, uint8 back_color) 
 {
@@ -45,8 +57,43 @@ void initVga(uint8 fore_color, uint8 back_color)
 	clear_vga_buffer(&vga_buffer, fore_color, back_color);  //clear buffer
 }
 
-void vga_putchar( char * arg, int x,  int y, char color)
+void graphics_char(char character, int x, int y, char color)
 {
-	vga_buffer[x*SCREENWIDTH+y]= vga_entry((char)arg, WHITE,  color);	
+	int r,g,b =0;
+	int q =0;
+	int j =0;
+	//character = 'X';
+for (int z = 0; z < 8; z++)
+ {
+	
+	 q++;
+	for (int h = 8; h > 0; h--)
+	{
+		j++;
+	char retc =(((font[(int)character][z] << h) & 0x80) ?  1 : 0 );
+	
+	if (retc == 1)
+	{
+		r=255;
+		g=0;
+		b=0;
+	}
+	else
+	{
+		r=0;
+		g=0;
+		b=0;
+	}
+		
+	putpixel(videoptr, j +x +5, q + y + 5 ,r,g,b);
+	}
+	j=0;
+ }
+}
+
+void vga_putchar( char arg, int x,  int y, char color)
+{
+	//vga_buffer[x*SCREENWIDTH+y]= vga_entry((char)arg, WHITE,  color);	
+	graphics_char((char)arg, x,y,color);
 
 }

@@ -41,11 +41,14 @@ static int lenHelper(unsigned x) {
 	return 1;
 }
 
+
+
+
 static int printf( char * arg, int x,  int y, char color)
 {
 	int len =0;
 	for(int i=0; arg[i]!='\0';++i){
-		vga_putchar((char)arg[i], x, y +i ,  color);
+		vga_putchar((char)arg[i], x + (len *10) , y ,  color);
 		e9_putchar(arg[i]);
 		len++;
 	}
