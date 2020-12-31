@@ -13,8 +13,6 @@ SECTIONS
         KEEP(*(.stivalehdr))
     }
 
-
-
   	/* text section */
 	.text BLOCK(4K) : ALIGN(4K)
 	{

@@ -14,7 +14,7 @@
 //#include "libc/include/string.h"
 
 
-void kernel_entry(struct stivale_struct  *info) 
+void _start(struct stivale_struct  *info) 
 {
 	/* init pic/idt */
 	//initialize_pic();
@@ -31,6 +31,8 @@ void kernel_entry(struct stivale_struct  *info)
  
 	//SetVideo(&info->framebuffer_addr, info->framebuffer_pitch, info->framebuffer_bpp);
 
+		e9_printf("info itself %x ", info);
+		e9_printf("info itself & %x ", &info);
  e9_printf("size of uint16_t %x ", sizeof(uint16_t));
  e9_printf("size of uint32_t %x ", sizeof(uint32_t));
  e9_printf("size of uint64_t %x ", sizeof(uint64_t));

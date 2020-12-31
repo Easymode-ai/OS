@@ -23,15 +23,19 @@
 .set HEIGHT, 600  /* requested height */
 .set DEPTH, 32    /* requested bits per pixel BPP */
 
+
 .section .stivalehdr, "ax", @progbits
-.globl stivale_header
+.global stivale_header
 stivale_header:
-  .quad stackTop
-  .word 1
-  .word 0
-  .word 0
-  .word 0
-  .quad 0
+.long stackTop
+.long 0
+.word 1
+.word 0
+.word 0
+.word 0
+.quad 0
+ 
+
 
 .section .bss
 stack:
@@ -53,7 +57,6 @@ stackTop:
 .type _start, @function
 
 
-_start:
 #mov 0x4F00,%ax  #set VBE graphic mode
 #mov 0x4114,%bx  #graphic mode 800x600 16bpp
 #int $0x10  #start BIOS interrupt
@@ -63,12 +66,12 @@ _start:
 # assign current stack pointer location to stackTop
 mov $stackTop, %esp
 hltLoop:
-call kernel_entry				# call the kernel main source
+call _start				# call the kernel main source
 #cli
 hlt
 jmp hltLoop						# put system in infinite loop
 
-.size _start, . - _start
+
 
 .text
 .global enablePaging
