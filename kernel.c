@@ -16,30 +16,32 @@
 void kernel_entry(struct stivale_struct *info) 
 {
 	/* init pic/idt */
-	initialize_pic();
-	initialize_idt_pointer();
-	load_idt(&idt_ptr);
+	//initialize_pic();
+	//initialize_idt_pointer();
+	//load_idt(&idt_ptr);
 	
-	load_idt_entry(0x21, (unsigned long) keyboard_handler_int, 0x08, 0x8e);
-	kb_init();
+	//load_idt_entry(0x21, (unsigned long) keyboard_handler_int, 0x08, 0x8e);
+	//kb_init();
 	
 	/* init memory */
-	initMemory();
+	//initMemory();
 
  //char* video  = (char*)0xb8000;
  
-int reswidth =1024;
-int resheight = 768;
+	//SetVideo(&info->framebuffer_addr, info->framebuffer_pitch, info->framebuffer_bpp);
 
-videoptr = &info->framebuffer_addr;
-videopitch = &info->framebuffer_pitch;
-videobpp = &info->framebuffer_bpp;
 
-printf("hello", 300,0, RED);
 
-for(int rx = 0; rx < 800; rx++)
-	for(int ry = 0; ry < 600; ry++)
-	putpixel(videoptr, rx, ry ,255,255,0);
+//printf("hello", 300,0, RED);
+
+for(int x = 0; x < 800; x++)
+	for(int y = 0; y < 600; y++)
+	{
+		
+	uint32_t * location = &info->framebuffer_addr + ((x * 800) + y);
+	*location= 0xFF0000;
+		//putpixel(videoptr, rx, ry ,255,255,0);
+	}
 
 //char character = 'A';
  

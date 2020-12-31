@@ -97,9 +97,9 @@ __attribute__((section(".stivalehdr"), used))
 struct stivale_header header = {
     .stack = sizeof(stack),
     .framebuffer_bpp = 32,
-    .framebuffer_width = 800,
-    .framebuffer_height = 600,
-    .flags = 1,
+    .framebuffer_width = 640,
+    .framebuffer_height = 480,
+    .flags = 0x0001,
     .entry_point = 0
 };
 

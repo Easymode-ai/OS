@@ -56,12 +56,17 @@ stackTop:
 
 
 _start:
+#mov 0x4F00,%ax  #set VBE graphic mode
+#mov 0x4114,%bx  #graphic mode 800x600 16bpp
+#int $0x10  #start BIOS interrupt
+
+
 
 # assign current stack pointer location to stackTop
 mov $stackTop, %esp
 hltLoop:
 call kernel_entry				# call the kernel main source
-cli
+#cli
 hlt
 jmp hltLoop						# put system in infinite loop
 
