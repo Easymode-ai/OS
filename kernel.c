@@ -6,6 +6,7 @@
 #include "kernel/display.h"
 #include "kernel/pic.h"
 #include "kernel/idt.h"
+#include "e9print.h"
 
 
 #include "drivers/keyboard.h"
@@ -13,7 +14,7 @@
 //#include "libc/include/string.h"
 
 
-void kernel_entry(struct stivale_struct *info) 
+void kernel_entry(struct stivale_struct  *info) 
 {
 	/* init pic/idt */
 	//initialize_pic();
@@ -30,17 +31,34 @@ void kernel_entry(struct stivale_struct *info)
  
 	//SetVideo(&info->framebuffer_addr, info->framebuffer_pitch, info->framebuffer_bpp);
 
-
-
+ e9_printf("size of uint16_t %x ", sizeof(uint16_t));
+ e9_printf("size of uint32_t %x ", sizeof(uint32_t));
+ e9_printf("size of uint64_t %x ", sizeof(uint64_t));
+  e9_printf("Framebuffer at %x with specifics:", info->framebuffer_addr);
+    e9_printf("\tPitch:  %d", info->framebuffer_pitch);
+    e9_printf("\tWidth:  %d", info->framebuffer_width);
+    e9_printf("\tHeight: %d", info->framebuffer_height);
+    e9_printf("\tBPP:    %d", info->framebuffer_bpp);
+    if (info->flags & (1 << 1)) {
+        e9_printf("\tExtended colour information passed:");
+        e9_printf("\t\tMemory model:     %d", info->fb_memory_model);
+        e9_printf("\t\tRed mask size:    %d", info->fb_red_mask_size);
+        e9_printf("\t\tRed mask shift:   %d", info->fb_red_mask_shift);
+        e9_printf("\t\tGreen mask size:  %d", info->fb_green_mask_size);
+        e9_printf("\t\tGreen mask shift: %d", info->fb_green_mask_shift);
+        e9_printf("\t\tBlue mask size:   %d", info->fb_blue_mask_size);
+        e9_printf("\t\tBlue mask shift:  %d", info->fb_blue_mask_shift);
+    }
 //printf("hello", 300,0, RED);
+//printhex(&info->framebuffer_height,1,1,1);
 
-for(int x = 0; x < 800; x++)
-	for(int y = 0; y < 600; y++)
+for(int x = 0; x < 600; x++)
+	for(int y = 0; y < 800; y++)
 	{
-		
-	uint32_t * location = &info->framebuffer_addr + ((x * 800) + y);
-	*location= 0xFF0000;
-		//putpixel(videoptr, rx, ry ,255,255,0);
+	uint32_t* vesaaddr = (uint32_t*)(info->framebuffer_addr)  + (x  * 800 )+ y ;	
+	//uint32_t * location = &info->framebuffer_addr + ((x * 800) + y);
+	*vesaaddr = 0xFF0000;
+		//putpixel(vesaaddr, x, y ,255,255,0);
 	}
 
 //char character = 'A';

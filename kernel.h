@@ -56,13 +56,13 @@ enum vga_color {
 };
 
 
-static uint8_t stack[22097152] = {0};
+//static uint8_t stack[222097152] = {0};
 
 struct stivale_struct {
     uint64_t cmdline;
     uint64_t memory_map_addr;
     uint64_t memory_map_entries;
-    uint64_t framebuffer_addr;
+    uint16_t framebuffer_addr;
     uint16_t framebuffer_pitch;
     uint16_t framebuffer_width;
     uint16_t framebuffer_height;
@@ -92,16 +92,16 @@ struct stivale_header {
 } __attribute__((packed));
 
 
-
+/*
 __attribute__((section(".stivalehdr"), used))
 struct stivale_header header = {
     .stack = sizeof(stack),
     .framebuffer_bpp = 32,
-    .framebuffer_width = 640,
-    .framebuffer_height = 480,
+    .framebuffer_width = 800,
+    .framebuffer_height = 600,
     .flags = 0x0001,
     .entry_point = 0
 };
-
+*/
 
 #define IDT_SIZE 256

@@ -44,7 +44,7 @@ static int lenHelper(unsigned x) {
 
 
 
-static int printf( char * arg, int x,  int y, char color)
+/*static int printf( char * arg, int x,  int y, char color)
 {
 	int len =0;
 	for(int i=0; arg[i]!='\0';++i){
@@ -54,7 +54,7 @@ static int printf( char * arg, int x,  int y, char color)
 	}
 	e9_putchar('\n');
 	return len;
-}
+}*/
 
 static int printint( int integer, int x,  int y, char color)
 {
@@ -82,19 +82,19 @@ static void printsize(int integer, int x, int y, char color, int type)
 	case 1: //bytes
 		{
 			int len = printint(integer*1024,x,y,color);
-			printf("Bytes", x , y + len+1, RED);
+			//printf("Bytes", x , y + len+1, RED);
 		}
 		break;
 	case 1024: //kb
 		{
 			int len = printint(integer,x,y,color);
-			printf("KBytes", x , y + len+1, RED);
+			//printf("KBytes", x , y + len+1, RED);
 		}
 		break;
 	case 1024*1024: //mb
 		{
 			int len = printint(integer/1024,x,y,color);
-			printf("MB", x , y + len+1, RED);
+			//printf("MB", x , y + len+1, RED);
 		}
 		break;
 	}
@@ -107,6 +107,15 @@ static void printhex( char * arg, int x,  int y, char color)
 	hexlookup(buffer, arg);
 	
 	for(int i=9; i > -1;i--)
+	{
 	vga_putchar((char)buffer[i], x, y +i ,  color);
+
+	}
+		for(int i=0; i  <10;i++)
+	{
+	
+	
+		e9_putchar((char)buffer[i]);
+	}
 }
 
