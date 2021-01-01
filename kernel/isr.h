@@ -5,7 +5,6 @@
 #pragma once
 #include "common.h"
 
-// A few defines to make life a little easier
 #define IRQ0	32
 #define IRQ1	33
 #define IRQ2	34
@@ -31,9 +30,6 @@ typedef struct registers
 	u32int	eip, cs, eflags, useresp, ss;		// Pushed by the processor automatically.
 } registers_t;
 
-// Enables registration of callbacks for interrupts or IRQs.
-// For IRQs, to ease confusion, use the #defines above as the 
-// first parameter.
 typedef void (*isr_t)(registers_t);
 isr_t interrupt_handlers[256];
 
@@ -44,35 +40,30 @@ void register_interrupt_handler(u8int n, isr_t handler)
 	interrupt_handlers[n] = handler;
 }
 
-// This gets called from our ASM interrupt handler stub.
 void isr_handler(registers_t regs)
 {
-	
 	if (interrupt_handlers[regs.int_no] != 0) {
 		isr_t handler = interrupt_handlers[regs.int_no];
 		handler(regs);
-	} else {
-		//monitor_write("unhandled interrupt: ");
-		//monitor_write_dec(regs.int_no);
-		//monitor_put('\n');
-	}
+	}else 
+		e9_printf("unhandled interrupt %d\n" , regs.int_no);
+	
 }
 
-// This gets called from our ASM interrupt handler stub.d
 void irq_handler(registers_t regs)
 {
 	
 	e9_printf("%d", regs.int_no);
 
-	// Send EOI (end of interrupt) signal to the PICs.
-	// If this interrupt involved the slave.
+
 	if (regs.int_no >= 40) {
+		
 		// Send reset signal to slave.
 		write_port(0xA0, 0x20);
 		e9_printf("reset signal to slave");
 	}
 
-	// Send reset signal to master. (As well as slave, if necessary).
+	// Send reset signal to master inc slave
 	write_port(0x20, 0x20);
 
 	if (interrupt_handlers[regs.int_no] != 0) {
@@ -173,20 +164,58 @@ void isr12_handler(void) {
 	write_port(0x20, 0x20); //EOI
 }
 
-void isr13_handler(void) {
+void isr13_handler(registers_t * regs) {
 	
-	e9_printf("\nISR13 - General Protection Failure\n");
+	uint64_t cr2addr;
+	asm("mov %%cr2, %[out]": [out]"=r"(cr2addr));
+
+	e9_printf("ISR13 - General Protection Failure %x", cr2addr);
+	
+	int present  = !(regs->err_code & 0x1) ? 1 : 0;
+	int rw       = regs->err_code & 0x2    ? 1 : 0;
+	int user     = regs->err_code & 0x4    ? 1 : 0;
+	int reserved = regs->err_code & 0x8    ? 1 : 0;
+	int id       = regs->err_code & 0x10   ? 1 : 0;
+	
+	
+	
+	e9_printf("present %d ", present);
+	e9_printf("rw %d ", rw);
+	e9_printf("user %d", user);
+	e9_printf("reserved %d ", reserved);
+	e9_printf("id %d ", id);
+	
+	if (present) e9_printf("Page IS present page-protection violation?");
+	else e9_printf("Page was not present, non present page?");
+	
+    if (rw) e9_printf("Operation was a write");
+    else e9_printf("Operation was a read");
+	
+	if (user) e9_printf("User mode");
+	else e9_printf("Supervisor mode");
+   
+	   if (id) e9_printf("Faulted during instruction fetch");
+
+	   
+	 if (reserved) e9_printf("Overwrote CPU-resereved bits of page entry");
+
+	if (regs->eip != cr2addr) {
+      e9_printf("Page fault caused by executing unpaged memory");
+    }
+   else {
+      e9_printf("Page fault caused by reading unpaged memory");
+   }
+
 	write_port(0x20, 0x20); //EOI
-		
-//	*(uint8_t*)~0 = 0x69;
 }
 
 void isr14_handler(void) {
 	
-	uint64_t cr2;
-	asm("mov %%cr2, %[out]": [out]"=r"(cr2));
-  
-	e9_printf("\nISR14 - Page Fault %x \n ", cr2);
+	uint64_t cr2addr;
+	asm("mov %%cr2, %[out]": [out]"=r"(cr2addr));
+
+	e9_printf("\nISR14 - Page Fault %x \n ", cr2addr);
+	e9_printf(" code is %d " , cr2addr);
 	write_port(0x20, 0x20); //EOI
 }
 
