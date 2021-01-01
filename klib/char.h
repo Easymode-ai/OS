@@ -44,17 +44,7 @@ static int lenHelper(unsigned x) {
 
 
 
-/*static int printf( char * arg, int x,  int y, char color)
-{
-	int len =0;
-	for(int i=0; arg[i]!='\0';++i){
-		vga_putchar((char)arg[i], x + (len *10) , y ,  color);
-		e9_putchar(arg[i]);
-		len++;
-	}
-	e9_putchar('\n');
-	return len;
-}*/
+
 
 static int printint( int integer, int x,  int y, char color)
 {
@@ -70,7 +60,7 @@ static int printint( int integer, int x,  int y, char color)
 	}
 	
 	for(int i =1; i < measure+1; i++)
-	vga_putchar((char)buffer[i]+'0', x, y +i-1 ,  color);
+		video_putchar((char)buffer[i]+'0', x, y +i-1 ,  color);
 	
 	return measure-1;
 }
@@ -108,7 +98,7 @@ static void printhex( char * arg, int x,  int y, char color)
 	
 	for(int i=9; i > -1;i--)
 	{
-	vga_putchar((char)buffer[i], x, y +i ,  color);
+		video_putchar((char)buffer[i], x, y +i ,  color);
 
 	}
 		for(int i=0; i  <10;i++)

@@ -1,10 +1,10 @@
+# res
+.set WIDTH, 800  /* requested width */
+.set HEIGHT, 600  /* requested height */
+.set DEPTH, 32    /* requested bits per pixel BPP */
+
 # set magic number to 0x1BADB002 to identified by bootloader 
 .set MAGIC,    0x1BADB002
-
-# bits
-.set ALIGN,    1<<0             
-.set MEMINFO,  1<<1
-.set VIDINFO,  1<<2
 
 # set flags to 0
 .set FLAGS,    0#ALIGN | MEMINFO | VIDINFO
@@ -15,14 +15,9 @@
 # set multiboot enabled
 .section .multiboot
 .align 4
-# define type to long for each data defined as above
 .long MAGIC
 .long FLAGS
 .long CHECKSUM
-.set WIDTH, 800  /* requested width */
-.set HEIGHT, 600  /* requested height */
-.set DEPTH, 32    /* requested bits per pixel BPP */
-
 
 .section .stivalehdr, "ax", @progbits
 .global stivale_header
@@ -30,61 +25,47 @@ stivale_header:
 .long stackTop
 .long 0
 .word 1
-.word 0
-.word 0
-.word 0
+.word WIDTH
+.word HEIGHT
+.word DEPTH
 .quad 0
- 
-
 
 .section .bss
 stack:
-  .space 4096
-
+.space 4096
 
 # set the stack bottom 
 .section .bss
 stackBottom:
 
-# define the maximum size of stack to 512 bytes
 .skip 524288
 
-# set the stack top which grows from higher to lower
 stackTop:
 
 .section .text
-.global _start
 .type _start, @function
-
-
-#mov 0x4F00,%ax  #set VBE graphic mode
-#mov 0x4114,%bx  #graphic mode 800x600 16bpp
-#int $0x10  #start BIOS interrupt
-
-
-
+cli
 # assign current stack pointer location to stackTop
 mov $stackTop, %esp
 hltLoop:
-call _start				# call the kernel main source
-#cli
+call _start	
 hlt
-jmp hltLoop						# put system in infinite loop
+jmp hltLoop	
 
-
-
+# enable paging cr0
 .text
 .global enablePaging
 enablePaging:
-push %ebp
-mov %esp, %ebp
+#push %ebp
+#mov %esp, %ebp
 mov %cr0, %eax
-or $0x80000000, %eax
+or $0x80000001, %eax
 mov %eax, %cr0
-mov %ebp, %esp
-pop %ebp
+#mov %ebp, %esp
+#pop %ebp
 ret
 
+# loadpage cr3
 .text
 .global loadpage
 loadpage:
@@ -96,41 +77,6 @@ mov %ebp, %esp
 leave
 ret
 
-#.text
-#.global _free
-#_free:
-#push %ebp
-#mov %esp, %ebp
-#sub $0x10, %esp
-#movb $0x8, -0x1(%ebp)
-#mov $0x0, %eax  
-#leave
-#ret
-
-#.text
-#.global malloc
-#malloc:
-#push %ebp
-#mov %esp, %ebp
-#mov 8(%esp), %eax
-#leave
-#ret*/
-
-#STACK
-#.text
-#.global sbrk
-#sbrk:
-#push %ebp
-#mov %esp, %ebp
-#sub $0x10, %esp
-#subtrack stack pointer down 0x10 to allocate ram
-#movb $0x8, -0x1(%ebp)
-#move byte uint8_t i = 8
-#mov $0x0, %eax  
-#return 0
-#leave
-#ret
-
 .text
 .global load_idt
 load_idt:
@@ -139,53 +85,407 @@ lidt (%eax)
 sti
 ret
 
-#.text
-#.global _key
-#_key:
-#xor %ah, %ah
-#int $0x16 #BIOS Keyboard Service 
-#ret*/
-
-#.text
-#.global idt_flush
-#idt_flush:
-#mov 4(%esp), %eax  	# Get the pointer to the IDT, passed as a parameter.
-#lidt (%eax)        		# Load the IDT pointer.
-#ret
-
 #arg: int, port number.
 .global read_port
 read_port:
-mov 4(%esp), %edx	#mov edx, [esp + 4]
-in %dx, %al 		#in al, dx   
+mov 4(%esp), %edx
+in %dx, %al 		 
 ret
 
 # arg: int, (dx)port number
 #      int, (al)value to write
 .global write_port
 write_port:
-mov   4(%esp), %edx #edx, [esp + 4]    
-mov   8(%esp), %al #al, [esp + 4 + 4]  
-out   %al, %dx #dx, al  
+mov   4(%esp), %edx  
+mov   8(%esp), %al 
+out   %al, %dx 
 ret
 
 .global keyboard_handler_int
 keyboard_handler_int:
+cli
+cld
+pusha
 call keyboard_handler
+mov $32, %al
+out %al, $160
+out %al, $32
+popa
+sti
 iret
 
-#.text
-#.global memset
-#memset:
-#kmemset:      
-#push    (%edi)          
+.global gdt_flush
+gdt_flush:
+mov 4(%esp), %eax
+lgdt (%eax)
+jmp $0x08, $complete_flush
+complete_flush:
+mov $0x10,%ax
+mov %ax, %ds
+mov %ax, %es
+mov %ax, %fs
+mov %ax, %gs
+mov %ax, %ss
+ret
 
-#mov     16(%esp), %ecx, #ecx, [esp + 16] ; size_t num
-#mov     12(%esp), %al #, [esp + 12]  ; int value 
-#mov     8(%esp), %edi # void * ptr
-#rep     stosb 
+.global irq_common_stub
+irq_common_stub:
+pusha
+push %ds
+push %es
+push %fs
+push %gs
+movw $0x10,%ax
+movw %ax,%ds
+movw %ax,%es
+movw %ax,%fs
+movw %ax,%gs
+movl %esp,%eax
+pushl %eax
+movl $irq_handler, %eax
+call *%eax
+popl %eax
+pop %gs 
+pop %fs
+pop %es
+pop %ds
+popa
+addl $8,%esp
+iret
 
-#mov     8(%esp),%eax #return ptr
-# pop     %edi            #edi
-#ret                     # let caller adjust stack
-#
+.global isr0
+isr0:
+pusha
+call isr0_handler
+popa
+iret
+
+.global isr1
+isr1:
+pusha
+call isr1_handler
+popa
+iret
+
+.global isr2
+isr2:
+pusha
+call isr2_handler
+popa
+iret
+
+.global isr3
+isr3:
+pusha
+call isr3_handler
+popa
+iret
+
+.global isr4
+isr4:
+pusha
+call isr4_handler
+popa
+iret
+
+.global isr5
+isr5:
+pusha
+call isr5_handler
+popa
+iret
+
+.global isr6
+isr6:
+pusha
+call isr6_handler
+popa
+iret
+
+.global isr7
+isr7:
+pusha
+call isr7_handler
+popa
+iret
+
+.global isr8
+isr8:
+pusha
+call isr8_handler
+popa
+iret
+
+.global isr9
+isr9:
+pusha
+call isr9_handler
+popa
+iret
+
+.global isr10
+isr10:
+pusha
+call isr10_handler
+popa
+iret
+
+.global isr11
+isr11:
+pusha
+call isr11_handler
+popa
+iret
+
+.global isr12
+isr12:
+pusha
+call isr12_handler
+popa
+iret
+
+.global isr13
+isr13:
+pusha
+call isr13_handler
+popa
+iret
+
+.global isr14
+isr14:
+pusha
+call isr14_handler
+popa
+iret
+
+.global isr15
+isr15:
+pusha
+call isr15_handler
+popa
+iret
+
+.global isr16
+isr16:
+pusha
+call isr16_handler
+popa
+iret
+
+.global isr17
+isr17:
+pusha
+call isr17_handler
+popa
+iret
+
+.global isr18
+isr18:
+pusha
+call isr18_handler
+popa
+iret
+
+.global isr19
+isr19:
+pusha
+call isr19_handler
+popa
+iret
+
+.global isr20
+isr20:
+pusha
+call isr20_handler
+popa
+iret
+
+.global isr21
+isr21:
+pusha
+call isr21_handler
+popa
+
+ret
+.global isr22
+isr22:
+pusha
+call isr22_handler
+popa
+iret
+
+.global isr23
+isr23:
+pusha
+call isr23_handler
+popa
+iret
+
+.global isr24
+isr24:
+pusha
+call isr24_handler
+popa
+iret
+
+.global isr25
+isr25:
+pusha
+call isr25_handler
+popa
+iret
+
+.global isr26
+isr26:
+pusha
+call isr26_handler
+popa
+iret
+
+.global isr27
+isr27:
+pusha
+call isr27_handler
+popa
+
+.global isr28
+isr28:
+pusha
+call isr28_handler
+popa
+iret
+
+.global isr29
+isr29:
+pusha
+call isr29_handler
+popa
+iret
+
+.global isr30
+isr30:
+pusha
+call isr30_handler
+popa
+iret
+
+.global isr31
+isr31:
+pusha
+call isr31_handler
+popa
+iret
+
+.global irq0
+irq0:
+pusha
+call irq0_handler
+popa
+iret
+
+.global irq1
+irq1:
+cli
+pushl $1
+pushl $33
+jmp irq_common_stub
+iret
+
+.global irq2
+irq2:
+pusha
+call irq2_handler
+popa
+iret
+
+.global irq3
+irq3:
+pusha
+call irq3_handler
+popa
+iret
+
+.global irq4
+irq4:
+pusha
+call irq4_handler
+popa
+iret
+
+.global irq5
+irq5:
+pusha
+call irq5_handler
+popa
+iret
+
+.global irq6
+irq6:
+pusha
+call irq6_handler
+popa
+iret
+
+.global irq7
+irq7:
+pusha
+call irq7_handler
+popa
+iret
+
+.global irq8
+irq8:
+pusha
+call irq8_handler
+popa
+iret
+
+.global irq9
+irq9:
+pusha
+call irq9_handler
+popa
+iret
+
+.global irq10
+irq10:
+pusha
+call irq10_handler
+popa
+iret
+
+.global irq11
+irq11:
+pusha
+call irq11_handler
+popa
+iret
+
+.global irq12
+irq12:
+pusha
+call irq12_handler
+popa
+iret
+
+.global irq13
+irq13:
+pusha
+call irq13_handler
+popa
+iret
+
+.global irq14
+irq14:
+pusha
+call irq14_handler
+popa
+iret
+
+.global irq15
+irq15:
+pusha
+call irq15_handler
+popa
+iret
+

@@ -6,7 +6,7 @@ AS = as
 CC = gcc
 LD = ld
 ASFLAGS = --32 boot.S -o boot.o
-CLIB = -m32 -c $(LIB_SOURCES) -std=gnu99 -O2 -w 
+CLIB = -m32 -c $(LIB_SOURCES) -fno-stack-protector -std=gnu99 -O2 -w 
  CFLAGS = -m32 -c kernel.c -std=gnu99 -ffreestanding -fno-stack-protector -O2    \
 	-fno-pic -fomit-frame-pointer -mno-80387 -mno-mmx -mno-3dnow -mno-sse \
 	-mno-sse2 -w -o kernel.o

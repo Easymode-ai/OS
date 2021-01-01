@@ -26,19 +26,17 @@ static void initMemory()
 	{
 		first_page_table[i] = (i * 0x1000) | 3; // attributes: supervisor level, read/write, present.
 	}
-
 	
 	page_directory[0] = ((unsigned int)first_page_table) | 3;
 	loadpage(page_directory);
 	enablePaging();
-	
-	
+	/*
 	current = &first_page_table[0];
 	struct memoryblock * block = (struct memoryblock *)first_page_table[0];
 	offset = &first_page_table[0];
 	block->address = current;
 	block->size= 1;
-	lastblock = block;
+	lastblock = block;*/
 }
 
 static uint32_t mallocr(int optional)

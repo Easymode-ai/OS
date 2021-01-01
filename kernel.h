@@ -62,7 +62,7 @@ struct stivale_struct {
     uint64_t cmdline;
     uint64_t memory_map_addr;
     uint64_t memory_map_entries;
-    uint16_t framebuffer_addr;
+    uint64_t framebuffer_addr;
     uint16_t framebuffer_pitch;
     uint16_t framebuffer_width;
     uint16_t framebuffer_height;
@@ -82,6 +82,7 @@ struct stivale_struct {
     uint8_t  fb_blue_mask_shift;
 } __attribute__((packed));
 
+
 struct stivale_header {
     uint64_t stack;
     uint16_t flags;
@@ -91,17 +92,3 @@ struct stivale_header {
     uint64_t entry_point;
 } __attribute__((packed));
 
-
-/*
-__attribute__((section(".stivalehdr"), used))
-struct stivale_header header = {
-    .stack = sizeof(stack),
-    .framebuffer_bpp = 32,
-    .framebuffer_width = 800,
-    .framebuffer_height = 600,
-    .flags = 0x0001,
-    .entry_point = 0
-};
-*/
-
-#define IDT_SIZE 256
