@@ -1,112 +1,51 @@
 #pragma once
 
-#define SCREENWIDTH 80
-#define VGA_ADDRESS 0xB8000
-#include "../kernel/font.h"
+#include "font.h"
+#include "paging.h"
+#include "../drivers/keyboard/keyboard_map.h"
 
- uint64_t videoptr = 0;
- uint16_t videopitch = 0;
- uint16_t videobpp =0;
- 
- static SetVideo(uint32_t ptr, uint32_t pitch, uint32_t  bpp)
- {
-	 
-	 videoptr=ptr;
-	 videopitch=pitch;
-	 videobpp=bpp;
- }
- 
- 
-static void putpixel(uint32_t * screen, int x, int y, int color) {
+
+
+static SetVideo(uint32_t ptr, uint32_t pitch, uint32_t  bpp)
+{
+	videoptr=ptr;
+	videopitch=pitch;
+	videobpp=bpp;
+}
+
+static void putpixel(uint32_t * screen, int x, int y, int color)
+{
 	
-	  unsigned where = x + (y*videopitch/4);
-    screen[where] = color;
-   // screen[where + 1] = g;
-   // screen[where + 2] = b;
-}
-
-static uint16 vga_entry(unsigned char ch, uint8 fore_color, uint8 back_color) 
-{
-	uint16 ax = 0;
-	uint8 ah = 0, al = 0;
-
-	ah = back_color;
-	ah <<= 4;
-	ah |= fore_color;
-	ax = ah;
-	ax <<= 8;
-	al = ch;
-	ax |= al;
-
-	return ax;
-}
-
-//clear video buffer array
-void clear_vga_buffer(uint16 **buffer, uint8 fore_color, uint8 back_color)
-{
-	uint32 i;
-	for(i = 0; i < BUFSIZE; i++){
-		(*buffer)[i] = vga_entry(NULL, fore_color, back_color);
-	}
-}
-
-//initialize vga buffer
-void initVga(uint8 fore_color, uint8 back_color)
-{
-	vga_buffer = (uint16*)VGA_ADDRESS;  //point vga_buffer pointer to VGA_ADDRESS 
-	clear_vga_buffer(&vga_buffer, fore_color, back_color);  //clear buffer
+	unsigned where = x + (y*videopitch/4);
+	screen[where] = color;
+	
 }
 
 int colorc = 0;
-void video_char(char character, int x, int y, char color)
+void video_char(char character, int x, int y, int color)
 {
-	colorc++;
-	int r,g,b =0;
-	int q =0;
-	int j =0;
-	int colorr = 0x000000;
-		switch(colorc)
-	{
-		case 1:
-		colorr = 0xFF0000;
-		break;
-		case 2:
-		colorr = 0x00FF00;
-		break;
-		case 3:
-		colorr = 0xFFFFFF;
-		break;
-	}
+	int q, j = 0;
 	
-		if (colorc > 2) colorc=0;
-	
-	//character = 'X';
-for (int z = 0; z < 8; z++)
- {
-	int color = 0;
-	 q++;
-	for (int h = 8; h >= 0; h--)
+	for (int z = 0; z < 8; z++)
 	{
-		color = 0;
+		q++;
+		for (int h = 8; h >= 0; h--)
+		{
+			
+			
+			j++;
+			int ret =(((font[(int)character][z] << h) & 0x80) ?  color : 0x000000 );
+			
+			
+				putpixel(videoptr, j +x, q + y, ret);
 		
-		j++;
-	char retc =(((font[(int)character][z] << h) & 0x80) ?  1 : 0 );
-	
-	if (retc == 1)
-	{
-	
-		color = colorr;
+		}
+		j=0;
 	}
-	
-		
-	putpixel(videoptr, j +x, q + y  ,color);
-	}
-	j=0;
- }
 }
 
 
-static int video_printf( char * arg, int x,  int y, char color)
+static int video_printf( char * arg, int x,  int y, int color)
 {
 	int len =0;
 	for(int i=0; arg[i]!='\0';++i){
@@ -116,4 +55,63 @@ static int video_printf( char * arg, int x,  int y, char color)
 	}
 	e9_putchar('\n');
 	return len;
+}
+
+
+
+int charoffset=10;
+int lineoffset = 10;
+
+int keycolor = 0xFFFFFF;
+void processchars(char mappedchar)
+{
+	
+	if (mappedchar == '\n')
+		{
+			lineoffset += 10;
+			charoffset = 0;
+		}
+		
+		
+		if (mappedchar == '\b') 
+		{ 
+			charoffset -= 10;
+			video_char((char)0, charoffset,lineoffset, 0x000000);
+			//e9_putchar((char)keyboard_map[keycode]);
+
+		}else{
+			video_char((char)mappedchar, charoffset, lineoffset, keycolor);
+			//e9_putchar((char)keyboard_map[keycode]);
+			charoffset += 10;
+		}
+}
+void processkeys(char keycode)
+{
+	
+
+		if (keycode == 0x48)
+		{
+			keycolor = 0xFF0000;
+		}
+		if (keycode == 0x50)
+		{
+			keycolor = 0xFFFFFF;
+		}
+		/*if (keycode == 0x1c)
+		{
+			lineoffset += 10;
+			charoffset = 0;
+		}*/
+	
+		if(keycode >= 0 && keyboard_map[keycode]) 
+			{
+			processchars(keyboard_map[keycode]);
+			}
+	
+	
+}
+
+void color (int c)
+{
+	keycolor=c;
 }

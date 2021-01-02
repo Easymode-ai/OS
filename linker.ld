@@ -4,7 +4,7 @@ ENTRY(_start)
 SECTIONS
 {
 	/* we need 1MB of space atleast */
-	. = 2M;
+	. = 3M;
 	//. = 0xffffffff80100000;
 
 	
@@ -38,5 +38,5 @@ SECTIONS
 		*(COMMON)
 		*(.bss)
 	}
-
+    end = .; _end = .; __end = .;
 }

@@ -1,6 +1,10 @@
+.extern end
+.global end
+end:
+
 # res
-.set WIDTH, 800  /* requested width */
-.set HEIGHT, 600  /* requested height */
+.set WIDTH, 1920  /* requested width */
+.set HEIGHT, 1080  /* requested height */
 .set DEPTH, 32    /* requested bits per pixel BPP */
 
 # set magic number to 0x1BADB002 to identified by bootloader 
@@ -48,6 +52,7 @@ cli
 # assign current stack pointer location to stackTop
 mov $stackTop, %esp
 hltLoop:
+
 call _start	
 hlt
 jmp hltLoop	
@@ -64,6 +69,7 @@ mov %eax, %cr0
 mov %ebp, %esp
 pop %ebp
 ret
+
 
 # loadpage cr3
 .text
@@ -488,4 +494,7 @@ pusha
 call irq15_handler
 popa
 iret
+
+
+
 

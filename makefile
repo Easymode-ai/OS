@@ -1,6 +1,6 @@
 LIMINE=limine/
 BIN = MyOS.bin
-LIB_SOURCES = $(wildcard libc/include/*.c libc/string/*.c libc/stdlib/*.c)
+LIB_SOURCES = $(wildcard libc/include/*.c libc/string/*.c libc/stdlib/*.c kernel/*.c)
 HEADERS = $(wildcard *.h kernel/*.h drivers/*.h libc/include/*.h)
 AS = as
 CC = gcc
@@ -11,7 +11,7 @@ CLIB = -m32 -c $(LIB_SOURCES) -fno-stack-protector -std=gnu99 -O2 -w
 	-fno-pic -fomit-frame-pointer -mno-80387 -mno-mmx -mno-3dnow -mno-sse \
 	-mno-sse2 -w -o kernel.o
 ARFLAGS = -crs library.a *.o
-LDFLAGS = -m elf_i386 -T linker.ld kernel.o memset.o boot.o -o $(BIN) -nostdlib 
+LDFLAGS = -m elf_i386 -T linker.ld ordered_array.o heap.o paging.o kernel.o common.o  boot.o -o $(BIN) -nostdlib 
 
 make:
 	make clean

@@ -8,17 +8,23 @@ static const char CONVERSION_TABLE[] = "0123456789abcdef";
 
 void e9_putc(char c) {
     e9_putchar(c);
+	
+	processchars(c);
     //asm volatile ("out dx, al" :: "a" (c), "d" (0xE9) : "memory");
 }
 
 void e9_print(const char *msg) {
     for (size_t i = 0; msg[i]; i++) {
+		
+		
         e9_putc(msg[i]);
+		
     }
 }
 
 void e9_puts(const char *msg) {
     e9_print(msg);
+	
     e9_putc('\n');
 }
 
@@ -74,8 +80,10 @@ void e9_printf(const char *format, ...) {
                 e9_printdec(va_arg(argp, size_t));
             } else if (*format == 's') {
                 e9_print(va_arg(argp, char*));
+				
             } 
         } else {
+			
             e9_putc(*format);
         }
         format++;
@@ -84,3 +92,4 @@ void e9_printf(const char *format, ...) {
     e9_putc('\n');
     va_end(argp);
 }
+

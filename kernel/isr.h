@@ -22,13 +22,6 @@
 #define IRQ14	46
 #define IRQ15	47
 
-typedef struct registers
-{
-	u32int	ds;					// Data segment selector
-	u32int	edi, esi, ebp, esp, ebx, edx, ecx, eax;	// Pushed by pusha
-	u32int	int_no, err_code;			// Interrupt number and error code (if applicable)
-	u32int	eip, cs, eflags, useresp, ss;		// Pushed by the processor automatically.
-} registers_t;
 
 typedef void (*isr_t)(registers_t);
 isr_t interrupt_handlers[256];
@@ -124,7 +117,7 @@ void isr5_handler(void) {
 
 void isr6_handler(void) {
 	
-	e9_printf("\nISR6 - Invalid opcode");
+//	e9_printf("\nISR6 - Invalid opcode");
 	write_port(0x20, 0x20); //EOI
 }
 
