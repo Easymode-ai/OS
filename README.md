@@ -7,8 +7,9 @@ Please abuse me with code submissions and hassle me on discord Mir2Euro#1825
 
 # Current state
 
-- Basic memory
-- Keyboard Interrupt (Was working but died since bootloader)
+- Basic VMM
+- Base IDT/GDT/RTS
+- Keyboard Interrupt
 - Graphics Mode
 
 # Perquisites 
