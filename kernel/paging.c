@@ -116,7 +116,7 @@ void initialise_paging(struct stivale_struct * info)
 {
 	// The size of physical memory. For we moment we
 	// assume it is 16Mb big.
-	u32int mem_end_page = 0x1000000;
+	u32int mem_end_page = 0x4000000;
 
 	nframes	= mem_end_page / 0x1000;
 	frames	= (u32int*)kmalloc(INDEX_FROM_BIT(nframes));
@@ -136,10 +136,8 @@ void initialise_paging(struct stivale_struct * info)
 	
 	int i = 0;
 	for (i = KHEAP_START; i < KHEAP_START + KHEAP_INITIAL_SIZE; i += 0x1000)
-	{
-		
 		get_page(i, 1, kernel_directory);
-	}
+
 
 	// We need to identify map (phys addr = virt addr) from
 	// 0x0 to the end of used memory, so we can access this
@@ -154,54 +152,68 @@ void initialise_paging(struct stivale_struct * info)
 	//e9_printf("%d,", placement_address);
 	placement_address+= 0x1000;
 	
-	while (i < placement_address + 0x1000) {
+while (i < placement_address + 0x1000) {
 		// Kernel code is readable but not writeable from userspace.
-		alloc_frame( get_page(i, 1, kernel_directory), 0, 1);
+		alloc_frame( get_page(i, 1, kernel_directory), 0, 0 );
 		i += 0x1000;
 	}
 	
-	
 
-	
 
-	//e9_printf("%x video address start:",info->framebuffer_addr);
+
+
+	// Now allocate
+// Now allocate those pages we mapped earlier.
+	//for (i = KHEAP_START; i < KHEAP_START + KHEAP_INITIAL_SIZE; i += 0x1000)
+	//	alloc_frame( get_page(i, 1, kernel_directory), 0, 0 );
+
+		//e9_printf("%x video address start:",info->framebuffer_addr);
 	
 	uint64_t start = info->framebuffer_addr;
 	uint64_t end = info->framebuffer_addr + (info->framebuffer_width * info->framebuffer_height * (info->framebuffer_bpp/8));
-	
+	uint64_t x = 0x3000000;
 	for (uint32_t i = start; i < end; i++) {
-		page_t * page = get_page(i, 1, kernel_directory);
+		page_t * page = get_page(x, 1, kernel_directory);
 		alloc_frame( page, 0, 1 );
 		page->frame = i >> 12;
+		x+= 1;
 	}
 	
-	//e9_printf("HEAP: %x",  KHEAP_START);
-	//e9_printf("HEAP-END: %x",  KHEAP_START + KHEAP_INITIAL_SIZE);
-	// Now allocate those pages we mapped earlier.
-	for (i = KHEAP_START; i < KHEAP_START + KHEAP_INITIAL_SIZE; i += 0x1000)
-		alloc_frame( get_page(i, 1, kernel_directory), 0, 1 );
-
-	//e9_printf("Memory  ");
-	// Before we enable paging, we must register our page fault handler.
-	//register_interrupt_handler(14, page_fault);
-
+	//videoptr = KHEAP_START + KHEAP_INITIAL_SIZE;
+	
+	
+	/*uint64_t blah = 0xFF123123;
+	page_t * page = get_page(blah, 1, kernel_directory);
+	alloc_frame( page, 0, 1 );
+	page->frame = blah >> 12;
+	*/
 	// Now, enable paging!
 	switch_page_directory(kernel_directory);
 
+
 	// Initialise the kernel heap.
-	//kheap = create_heap(KHEAP_START, KHEAP_START + KHEAP_INITIAL_SIZE, 0xCFFFF000, 0, 0);
+	////kheap = create_heap(KHEAP_START, KHEAP_START + KHEAP_INITIAL_SIZE, 0xCFFFF000, 0, 0);
 	
-			
+	
+//	c[0] = 'x';
+	
+	//ae9_printf('%c', c);
+	///alloc_frame( get_page(&blah, 1, kernel_directory), 0, 1 );
+	//9_printf("%x", blah);
+		//blah = 'c';
 
 }
 void switch_page_directory(page_directory_t *dir)
 {
       current_directory = dir;
-    asm volatile("mov %0, %%cr3":: "r"(&dir->tablesPhysical));
-    u32int cr0;
-    asm volatile("mov %%cr0, %0": "=r"(cr0));
-    cr0 |= 0x80000000; // Enable paging!
-    asm volatile("mov %0, %%cr0":: "r"(cr0));
+	 current_directory = dir;
+	asm volatile("mov %0, %%cr3":: "r"(&dir->tablesPhysical));
+	u32int cr0;
+	asm volatile("mov %%cr0, %0": "=r"(cr0));
+	cr0 |= 0x80000000;	// Enable paging!
+	asm volatile("mov %0, %%cr0":: "r"(cr0));
+
+	
 }
 page_t *get_page(u32int address, int make, page_directory_t *dir)
 {
@@ -222,35 +234,4 @@ page_t *get_page(u32int address, int make, page_directory_t *dir)
 	} else {
 		return 0;
 	}
-}
-
-void page_fault(registers_t regs)
-{
-	// A page fault has occured.
-	// The faulting address is stored in the CR2 register.
-	u32int faulting_address;
-	asm volatile("mov %%cr2, %0" : "=r" (faulting_address));
-
-	// The error code gives us detailing og what happened.
-	int present	= !(regs.err_code & 0x1);	// Page not present
-	int rw		= regs.err_code & 0x2;		// Write operation?
-	int us		= regs.err_code & 0x4;		// Processor was in user-mode?
-	int reserved	= regs.err_code & 0x8;		// Overwritten CPU-reserved bits of page entry?
-	int id		= regs.err_code & 0x10;		// Caused by an instruction fetch?
-
-	// Output en error message.
-	e9_printf("Page fault! ( ");
-	if (present)
-		e9_printf("present ");
-	if (rw)
-		e9_printf("read-only ");
-	if (us)
-		e9_printf("user-mode ");
-	if (reserved)
-		e9_printf("reserved ");
-
-	e9_printf(") at 0x");
-	e9_printf(faulting_address);
-	e9_printf("\n");
-	e9_printf("Page fault");
 }

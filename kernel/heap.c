@@ -6,16 +6,25 @@ u32int placement_address = 0;//(u32int)&end;
 extern page_directory_t *kernel_directory;
 heap_t *kheap = 0;
 
+
+u32int malloc(size_t size)
+{
+	return 0x3020000;
+}
+
 u32int kmalloc_int(u32int sz, int align, u32int *phys)
 {
+	
 	if (kheap != 0) {
+		e9_printf("hi2");
 		void *addr = alloc(sz, (u8int)align, kheap);
 		if (phys != 0) {
 			page_t *page = get_page( (u32int)addr, 0, kernel_directory );
-			*phys = page->frame * 0x1000 + (u32int)addr & 0xFFF;
+			*phys = page->frame * 0x1000 ;//+ (u32int)addr & 0xFFF;
 		}
 		return (u32int)addr;
 	} else {
+		
 		if ( align == 1 && (placement_address & 0xFFFFF000) ) {
 			// Align the placement address;
 			placement_address &= 0xFFFFF000;
@@ -145,6 +154,7 @@ heap_t *create_heap(u32int start, u32int end_addr, u32int max, u8int supervisor,
 {
 	heap_t *heap = (heap_t*)kmalloc(sizeof(heap_t));
 
+	
 	// All our assumptions are made on startAddress and endAddress being page-aligned.
 	//ASSERT(start%0x1000 == 0);
 	//ASSERT(end_addr%0x1000 == 0);

@@ -7,6 +7,8 @@ static uint64_t videoptr = 0;
 static uint16_t videopitch = 0;
 static uint16_t videobpp =0;
 
+
+
 typedef struct page
 {
 	u32int present	: 1;	// Page present in memory
@@ -41,14 +43,6 @@ typedef struct page_directory
 	u32int physicalAddr;
 } page_directory_t;
 
-// The kernel's page directory
-static page_directory_t *kernel_directory	= 0;
-
-// The current page directory
-static page_directory_t *current_directory	= 0;
-
-// The current page directory
-static page_directory_t *video_directory	= 0;
 /**
  * Sets up the environment , page directories etc and
  * enables paging.
@@ -72,3 +66,10 @@ page_t *get_page(u32int address, int make, page_directory_t *dir);
  * Handler for page faults.
  */
 void page_fault(registers_t regs);
+
+
+// The kernel's page directory
+static page_directory_t *kernel_directory	= 0;
+
+// The current page directory
+static page_directory_t *current_directory	= 0;

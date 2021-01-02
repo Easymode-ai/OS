@@ -37,11 +37,20 @@ void memcpy(u8int *dest, const u8int *src, u32int len)
 }
 
 // Write len copies of val  into dest.
-void memset(u8int *dest, u8int val, u32int len)
+void *memset(void *dest, int value, size_t count)
 {
-	u8int *temp = (u8int *)dest;
-	for ( ; len != 0; len--)
-		*temp++ = val;
+   uint8_t val = (uint8_t)(value & 0xFF);
+   uint8_t *dest2 = (uint8_t*)(dest);
+
+   size_t i = 0;
+
+   while(i < count)
+   {
+      dest2[i] = val;
+      i++;
+   }
+
+   return dest;
 }
 
 // Compare two strings. Should return -1 if

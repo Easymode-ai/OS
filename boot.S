@@ -3,8 +3,8 @@
 end:
 
 # res
-.set WIDTH, 1920  /* requested width */
-.set HEIGHT, 1080  /* requested height */
+.set WIDTH, 1280  /* requested width */
+.set HEIGHT, 720  /* requested height */
 .set DEPTH, 32    /* requested bits per pixel BPP */
 
 # set magic number to 0x1BADB002 to identified by bootloader 
