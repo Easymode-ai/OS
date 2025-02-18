@@ -1,9 +1,6 @@
-/**
-* isr.h - Interface to structures for high level interrupt service routines.
-* @version $Id$
-*/
 #pragma once
-#include "common.h"
+#include "structs.h"
+#include "timer.h"
 
 #define IRQ0	32
 #define IRQ1	33
@@ -22,13 +19,12 @@
 #define IRQ14	46
 #define IRQ15	47
 
-
 typedef void (*isr_t)(registers_t);
 isr_t interrupt_handlers[256];
 
 extern isr_t interrupt_handlers[];
 
-void register_interrupt_handler(u8int n, isr_t handler)
+void register_interrupt_handler(uint8_t n, isr_t handler)
 {
 	interrupt_handlers[n] = handler;
 }
@@ -42,6 +38,57 @@ void isr_handler(registers_t regs)
 		e9_printf("unhandled interrupt %d\n" , regs.int_no);
 	
 }
+
+extern co_yeield_handler(registers_t );
+extern irq0_handler_int(registers_t );
+extern irq1_handler_int(registers_t );
+extern irq2_handler_int(registers_t );
+extern irq3_handler_int(registers_t );
+extern irq4_handler_int(registers_t );
+extern irq5_handler_int(registers_t );
+extern irq6_handler_int(registers_t );
+extern irq7_handler_int(registers_t );
+extern irq8_handler_int(registers_t );
+extern irq9_handler_int(registers_t );
+extern irq10_handler_int(registers_t );
+extern irq11_handler_int(registers_t );
+extern irq12_handler_int(registers_t );
+extern irq13_handler_int(registers_t );
+extern irq14_handler_int(registers_t );
+extern irq15_handler_int(registers_t );
+extern isr0_handler_int(registers_t );
+extern isr1_handler_int(registers_t );
+extern isr2_handler_int(registers_t );
+extern isr3_handler_int(registers_t );
+extern isr4_handler_int(registers_t );
+extern isr5_handler_int(registers_t );
+extern isr6_handler_int(registers_t );
+extern isr7_handler_int(registers_t );
+extern isr8_handler_int(registers_t );
+extern isr9_handler_int(registers_t );
+extern isr10_handler_int(registers_t );
+extern isr11_handler_int(registers_t );
+extern isr12_handler_int(registers_t );
+extern isr13_handler_int(registers_t );
+extern isr14_handler_int(registers_t );
+extern isr15_handler_int(registers_t );
+extern isr16_handler_int(registers_t );
+extern isr17_handler_int(registers_t );
+extern isr18_handler_int(registers_t );
+extern isr19_handler_int(registers_t );
+extern isr20_handler_int(registers_t );
+extern isr21_handler_int(registers_t );
+extern isr22_handler_int(registers_t );
+extern isr23_handler_int(registers_t );
+extern isr24_handler_int(registers_t );
+extern isr25_handler_int(registers_t );
+extern isr26_handler_int(registers_t );
+extern isr27_handler_int(registers_t );
+extern isr28_handler_int(registers_t );
+extern isr29_handler_int(registers_t );
+extern isr30_handler_int(registers_t );
+extern isr31_handler_int(registers_t );
+
 
 void irq_handler(registers_t regs)
 {
@@ -78,6 +125,13 @@ void irq_handler(registers_t regs)
 	}
 }
 
+void co_yield_handler()
+{
+	
+	asm("jmp .");
+	e9_printf("Yield\n");
+	
+}
 
 void isr0_handler(void) {
 	
@@ -115,10 +169,32 @@ void isr5_handler(void) {
 	write_port(0x20, 0x20); //EOI
 }
 
-void isr6_handler(void) {
+void isr6_handler(registers_t * regs) 
+{
+
+		uint64_t cr2addr;
+	asm("mov %%cr2, %[out]": [out]"=r"(cr2addr));
+
+	e9_printf("nISR6 - Invalid opcode %x\n", cr2addr);
 	
-//	e9_printf("\nISR6 - Invalid opcode");
+	e9_printf("Error code %d\n ", regs->err_code);
+	int present  = !(regs->err_code & 0x1) ? 1 : 0;
+	int rw       = regs->err_code & 0x2    ? 1 : 0;
+	int user     = regs->err_code & 0x4    ? 1 : 0;
+	int reserved = regs->err_code & 0x8    ? 1 : 0;
+	int id       = regs->err_code & 0x10   ? 1 : 0;
+	
+	
+	
+	e9_printf("present %d ", present);
+	e9_printf("rw %d ", rw);
+	e9_printf("user %d", user);
+	e9_printf("reserved %d ", reserved);
+	e9_printf("id %d ", id);
+	asm("jmp .");
 	write_port(0x20, 0x20); //EOI
+		
+	
 }
 
 void isr7_handler(void) {
@@ -159,11 +235,13 @@ void isr12_handler(void) {
 
 void isr13_handler(registers_t * regs) {
 	
+	
 	uint64_t cr2addr;
 	asm("mov %%cr2, %[out]": [out]"=r"(cr2addr));
 
-	e9_printf("ISR13 - General Protection Failure %x", cr2addr);
+	e9_printf("ISR13 - General Protection Failure cr2=%x\n", cr2addr);
 	
+	e9_printf("Error code %d\n ", regs->err_code);
 	int present  = !(regs->err_code & 0x1) ? 1 : 0;
 	int rw       = regs->err_code & 0x2    ? 1 : 0;
 	int user     = regs->err_code & 0x4    ? 1 : 0;
@@ -178,37 +256,75 @@ void isr13_handler(registers_t * regs) {
 	e9_printf("reserved %d ", reserved);
 	e9_printf("id %d ", id);
 	
-	if (present) e9_printf("Page IS present page-protection violation?");
-	else e9_printf("Page was not present, non present page?");
+	if (present) e9_printf("Page IS present page-protection violation?\n");
+	else e9_printf("Page was not present, non present page?\n");
 	
-    if (rw) e9_printf("Operation was a write");
-    else e9_printf("Operation was a read");
+    if (rw) e9_printf("Operation was a write\n");
+    else e9_printf("Operation was a read\n");
 	
-	if (user) e9_printf("User mode");
-	else e9_printf("Supervisor mode");
+	if (user) e9_printf("User mode\n");
+	else e9_printf("Supervisor mode\n");
    
-	   if (id) e9_printf("Faulted during instruction fetch");
+	   if (id) e9_printf("Faulted during instruction fetch\n");
 
 	   
-	 if (reserved) e9_printf("Overwrote CPU-resereved bits of page entry");
+	 if (reserved) e9_printf("Overwrote CPU-resereved bits of page entry\n");
 
 	if (regs->eip != cr2addr) {
-      e9_printf("Page fault caused by executing unpaged memory");
+      e9_printf("Page fault caused by executing unpaged memory\n");
     }
    else {
-      e9_printf("Page fault caused by reading unpaged memory");
+      e9_printf("Page fault caused by reading unpaged memory\n");
    }
-
+asm("jmp .");
 	write_port(0x20, 0x20); //EOI
 }
 
-void isr14_handler(void) {
+void isr14_handler(registers_t * regs) {
 	
 	uint64_t cr2addr;
 	asm("mov %%cr2, %[out]": [out]"=r"(cr2addr));
 
-	e9_printf("\nISR14 - Page Fault %x \n ", cr2addr);
-	e9_printf(" code is %d " , cr2addr);
+
+
+	e9_printf("IsR14 PAGE FAULT=%x\n", cr2addr);
+	
+	e9_printf("Error code %d\n ", regs->err_code);
+	int present  = !(regs->err_code & 0x1) ? 1 : 0;
+	int rw       = regs->err_code & 0x2    ? 1 : 0;
+	int user     = regs->err_code & 0x4    ? 1 : 0;
+	int reserved = regs->err_code & 0x8    ? 1 : 0;
+	int id       = regs->err_code & 0x10   ? 1 : 0;
+	
+	
+	
+	e9_printf("present %d ", present);
+	e9_printf("rw %d ", rw);
+	e9_printf("user %d", user);
+	e9_printf("reserved %d ", reserved);
+	e9_printf("id %d ", id);
+	
+	if (present) e9_printf("Page IS present page-protection violation?\n");
+	else e9_printf("Page was not present, non present page?\n");
+	
+    if (rw) e9_printf("Operation was a write\n");
+    else e9_printf("Operation was a read\n");
+	
+	if (user) e9_printf("User mode\n");
+	else e9_printf("Supervisor mode\n");
+   
+	   if (id) e9_printf("Faulted during instruction fetch\n");
+
+	   
+	 if (reserved) e9_printf("Overwrote CPU-resereved bits of page entry\n");
+
+	if (regs->eip != cr2addr) {
+      e9_printf("Page fault caused by executing unpaged memory\n");
+    }
+   else {
+      e9_printf("Page fault caused by reading unpaged memory\n");
+   }
+	asm("jmp .");
 	write_port(0x20, 0x20); //EOI
 }
 
@@ -314,9 +430,9 @@ void isr31_handler(void) {
 	write_port(0x20, 0x20); //EOI
 }
 
-void irq0_handler(void) {
+void irq0_handler(registers_t r) {
 	
-	e9_printf("hi0");
+	timer_handler(r);
 	write_port(0x20, 0x20); //EOI
 }
 
@@ -364,7 +480,7 @@ void irq7_handler(void) {
 
 void irq8_handler(void) {
 	
-	//e9_printf("hi8");
+	e9_printf("hi8");
 	write_port(0x20, 0x20); //EOI
 }
 
@@ -394,7 +510,7 @@ void irq12_handler(void) {
 
 void irq13_handler(void) {
 	
-	//e9_printf("hi13");
+	e9_printf("hi13");
 	write_port(0x20, 0x20); //EOI
 }
 
