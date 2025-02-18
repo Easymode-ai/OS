@@ -1,27 +1,31 @@
-The stivale 2 protocol is a replacement for the stivale protocol that is able to be cleanly extended without breaking changes, it has support for extra features such as SMP compared to the older protocol.
+# <Give me a name> OS
+Feel free to contribute your code suggestions/fixes.
 
-## the stivale 2 header
-This structure must be present in the `.stivale2hdr` section in order for your kernel to be loaded by stivale 2.
+The purpose of this project is to learn how to design an OS and all the hoops involved.
 
-```c
-struct stivale2_header {
-    uint64_t entry_point;
-    uint64_t stack;
-    uint64_t flags;
-    uint64_t tags;
-} __attribute__((packed));
-```
+Please abuse me with code submissions and hassle me on discord Mir2Euro#1825
 
-If `entry_point` is 0 then the ELF entry point will be jumped to, otherwise the address specified will be used, `stack` will be loaded into the stack pointer register, as of now `flags` is 1 if KASLR is to be enabled.
+# Current state
 
-`tags` is a pointer to the first of a linked list of tags which determine the features requested by the kernel, the base structure of a tag is:
+- Basic VMM
+- Base IDT/GDT/RTS
+- Keyboard Interrupt
+- Graphics Mode
 
-```c
-struct stivale2_hdr_tag {
-    uint64_t identifier;
-    uint64_t next;
-} __attribute__((packed));
-```
+# Perquisites 
 
-Where `identifier` determines the type of the tag, while `next` determines the next tag, a value of `NULL` indicates the end of the list.
-For further information on the supported tags consule the [Stivale2 Specification](https://github.com/limine-bootloader/limine/blob/master/STIVALE2.md)
+Linux OR compatible (Subsystem on insider program with KVM is possible!)
+
+QEMU with KVM or compatible (must boot img, or you will need to convert)
+
+echfs-utils @ (https://github.com/echfs/echfs) 
+
+# Getting Started
+Run make
+Run qemu qemu-system-x86_64 -kernel MyOS.bin
+
+# Important 
+
+The makefile assumes that you have Ubuntu subsystem installed, and latest insider program (dev) build with a kvm enabled rebuild of the kernel.
+
+Please modify the makefile to suit your machines needs, I know this is fugly right now maybe we/I can improve that.
