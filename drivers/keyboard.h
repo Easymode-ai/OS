@@ -1,13 +1,14 @@
 #pragma once
 
+#include "../kernel/library/e9print.h"
 #include "../kernel/isr.h"
 #include "keyboard/keyboard_map.h"
 
-
-void keyboard_handler(registers_t regs) {
+void extern keyboard_handler(registers_t regs) {
 	
-	signed  char keycode = read_port(0x60);
+	char keycode = (char)read_port(0x60);
+	
 	processkeys(keycode);
-	
 	write_port(0x20, 0x20);
+	
 }
