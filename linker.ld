@@ -1,42 +1,38 @@
-/* entry point of our kernel */
-ENTRY(_start)
+ENTRY(stivale2_main)
 
 SECTIONS
 {
-	/* we need 1MB of space atleast */
-	. = 3M;
-	//. = 0xffffffff80100000;
+ 
+    kernel_phys_offset = 0xffffffff80000000;
+    . = kernel_phys_offset + 0x100000;
 
-	
-    .stivalehdr ALIGN(4K) :
+    .stivale2hdr ALIGN(4K) :
     {
         KEEP(*(.stivalehdr))
     }
 
-  	/* text section */
-	.text BLOCK(4K) : ALIGN(4K)
-	{
-		*(.multiboot)
-		*(.text)
-	}
+    .text ALIGN(4K) :
+    {
+        KEEP(*(.text*))
+    }
 
-	/* read only data section */
-	.rodata BLOCK(4K) : ALIGN(4K)
-	{
-		*(.rodata)
-	}
+    .rodata ALIGN(4K) :
+    {
+        KEEP(*(.rodata*))
+    }
 
-	/* data section */
-	.data BLOCK(4K) : ALIGN(4K)
-	{
-		*(.data)
-	}
+    .data ALIGN(4K) :
+    {
+        KEEP(*(.data*))
+    }
 
-	/* bss section */
-	.bss BLOCK(4K) : ALIGN(4K)
-	{
-		*(COMMON)
-		*(.bss)
-	}
-    end = .; _end = .; __end = .;
+    .bss ALIGN(4K) :
+    {
+        KEEP(*(COMMON))
+        KEEP(*(.bss*))
+    }
+    .text : { *(.text) }
+    .data : { *(.data) }
+    .bss  : { *(.bss)  }
+	end = .; 
 }

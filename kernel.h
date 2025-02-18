@@ -1,49 +1,34 @@
 #pragma once
-
-#include "kernel/common.h"
-#include "kernel/stivale.h"
+#include <stivale2.h>
 
 
-	
-extern void loadpage(unsigned int*);
-extern void enablePaging();
+void stivale2_main(struct stivale2_struct *info);
 
-extern unsigned char read_port (int port);
-extern void write_port (int port, unsigned char val);
-extern void kb_init(void);
-extern unsigned char _key();
-
-extern void keyboard_handler_int();
-extern void load_idt(void *);
-
-
-
-#define BUFSIZE 2200
-
-uint16* vga_buffer;
-
-#define NULL 0
-
-enum vga_color {
-	BLACK,
-	BLUE,
-	GREEN,
-	CYAN,
-	RED,
-	MAGENTA,
-	BROWN,
-	GREY,
-	DARK_GREY,
-	BRIGHT_BLUE,
-	BRIGHT_GREEN,
-	BRIGHT_CYAN,
-	BRIGHT_RED,
-	BRIGHT_MAGENTA,
-	YELLOW,
-	WHITE,
+struct stivale2_header_tag_smp smp_request = {
+	.tag = {
+		.identifier = STIVALE2_HEADER_TAG_SMP_ID, 
+		.next       = 0
+	},
+	.flags =1
 };
 
+struct stivale2_header_tag_framebuffer framebuffer_request = {
+	.tag = {
+		.identifier = STIVALE2_HEADER_TAG_FRAMEBUFFER_ID, 
+		.next       = &smp_request,
+	},
+	.framebuffer_width = 1280,
+		.framebuffer_height = 720,
+		.framebuffer_bpp = 32
+};
 
-//static uint8_t stack[222097152] = {0};
+static uint8_t stack[4096] = {0};
 
+__attribute__((section(".stivale2hdr"), used))
+struct stivale2_header header2 = {
+	.entry_point = (uint64_t)stivale2_main,
+	.stack       = (uintptr_t)stack + sizeof(stack),
+	.flags       = 1,
+	.tags        = (uint64_t)&framebuffer_request
+};
 
